@@ -1,57 +1,68 @@
 import { prisma } from "../lib/prisma"
 import express from "express"
 import { ProductListResponseSchema, ProductSchema } from "contract"
-import type { Product } from "contract"
+import type { Product, ProductInput } from "contract"
+import { ProductCategory, CoffeeForm, CoffeeRoastLevel } from "../generated/prisma/enums"
 
 const app = express()
 const port = 3000
 
-function mapProductToContract(p: ProductRow): Product {
-  if (p.category === "coffee") {
-    const coffee = {
-      id: p.id,
-      name: p.name,
-      description: p.description,
-      unitPriceCents: p.unitPriceCents,
-      category: "coffee",
-      form: p.coffee?.form,
-      weightGrams: p.coffee?.weightGrams,
-      roastLevel: p.coffee?.roastLevel,
-      ...(p.coffee?.form === "ground" ? { grindSize: p.coffee.grindSize } : {})
-    }
-    return ProductSchema.parse(coffee)
+function mapRowToProductContract(p: ProductRow): ProductInput {
+  const base = {
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    unitPriceCents: p.unitPriceCents
   }
-  else if (p.category === "merch") {
-    const merch = {
-      id: p.id,
-      name: p.name,
-      description: p.description,
-      unitPriceCents: p.unitPriceCents,
-      category: "merch",
-      merchType: p.merch?.merchType
-    }
-    return ProductSchema.parse(merch)
+  switch (p.category) {
+    case ProductCategory.coffee:
+      if (!p.coffee) throw new Error(`Missing coffee data for: ${p.id}`)
+      if (p.coffee.form == CoffeeForm.ground) {
+        if (p.coffee.grindSize == null) throw new Error(`Missing grounded coffee grindSize ${p.id}`)
+        return {
+          ...base,
+          category: p.category,
+          weightGrams: p.coffee.weightGrams,
+          form: p.coffee.form,
+          roastLevel: p.coffee.roastLevel,
+          grindSize: p.coffee.grindSize,
+        }
+      }
+      return {
+        ...base,
+        category: p.category,
+        weightGrams: p.coffee.weightGrams,
+        form: p.coffee.form,
+        roastLevel: p.coffee.roastLevel,
+      }
+    case ProductCategory.merch:
+      if (p.merch == undefined) throw new Error(`Missing merch ${p.id}`)
+      return {
+        ...base,
+        category: p.category,
+        merchType: p.merch.merchType
+      }
+    case ProductCategory.bundle:
+      if (p.bundle == undefined) throw new Error(`Missing bundle ${p.id}`)
+      if (p.bundle.items == undefined) throw new Error(`Missing items ${p.id}`)
+      return {
+        ...base,
+        category: p.category,
+        items: p.bundle.items.map((item) => {
+          if (item.product.category == ProductCategory.bundle)
+            throw new Error(`Bundle cannot contains other bundle ${p.id}`)
+          return {
+            product: {
+              id: item.product.id,
+              name: item.product.name,
+              unitPriceCents: item.product.unitPriceCents,
+              category: item.product.category,
+            },
+            quantity: item.quantity
+          }
+        })
+      }
   }
-  else if (p.category === "bundle") {
-    const bundle = {
-      id: p.id,
-      name: p.name,
-      description: p.description,
-      unitPriceCents: p.unitPriceCents,
-      category: "bundle",
-      items: p.bundle?.items.map((item) => ({
-        product: {
-          id: item.product.id,
-          name: item.product.name,
-          unitPriceCents: item.product.unitPriceCents,
-          category: item.product.category,
-        },
-        quantity: item.quantity
-      }))
-    }
-    return ProductSchema.parse(bundle)
-  }
-  throw new Error(`Unrecognized category: ${p.category}`)
 }
 
 function findProductRows() {
@@ -67,7 +78,7 @@ type ProductRow = Awaited<ReturnType<typeof findProductRows>>[number]
 
 app.get('/products', async (req, res) => {
   const productRows: ProductRow[] = await findProductRows()
-  const products: Product[] = productRows.map(mapProductToContract)
+  const products: ProductInput[] = productRows.map(mapRowToProductContract)
   res.json(ProductListResponseSchema.parse({
     items: products
   }))

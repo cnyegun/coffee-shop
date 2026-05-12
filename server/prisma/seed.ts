@@ -1,4 +1,9 @@
 import { prisma } from "../lib/prisma"
+import {
+  ProductCategory,
+  CoffeeForm,
+  CoffeeRoastLevel,
+} from "../generated/prisma/enums"
 
 async function main() {
   // Reset the db
@@ -15,51 +20,51 @@ async function main() {
       {
         id: "morning-lift-250g", name: "Morning Lift",
         description: "Bright medium roast for daily brewing.",
-        unitPriceCents: 199, category: "coffee"
+        unitPriceCents: 199, category: ProductCategory.coffee
       },
       {
         id: "velvet-ground-340g", name: "Velvet Ground",
         description: "Smooth ground coffee for filter brewing.",
-        unitPriceCents: 239, category: "coffee"
+        unitPriceCents: 239, category: ProductCategory.coffee
       },
       {
         id: "midnight-ground-250g", name: "Midnight Ground",
         description: "Bold dark ground coffee.",
-        unitPriceCents: 289, category: "coffee"
+        unitPriceCents: 289, category: ProductCategory.coffee
       },
 
       // Merch
       {
         id: "classic-mug-white", name: "Classic White Mug",
         description: "Ceramic white mug with our coffee shop logo.",
-        unitPriceCents: 599, category: "merch"
+        unitPriceCents: 599, category: ProductCategory.merch
       },
 
       {
         id: "canvas-tote-cream", name: "Cream Canvas Tote",
         description: "Reusable canvas tote bag.",
-        unitPriceCents: 1299, category: "merch"
+        unitPriceCents: 1299, category: ProductCategory.merch
       },
 
       // Bundle
       {
         id: "starter-bundle", name: "Starter Bundle",
         description: "Recommended by coffee enthusiast. JustBrew™.",
-        unitPriceCents: 699, category: "bundle"
+        unitPriceCents: 699, category: ProductCategory.bundle
       },
       {
         id: "dark-brew-kit", name: "Dark Brew Kit",
         description: "For something more than just light brewing sessions.",
-        unitPriceCents: 699, category: "bundle"
+        unitPriceCents: 699, category: ProductCategory.bundle
       },
     ]
   })
 
   await prisma.coffee.createMany({
     data: [
-      { productId: "morning-lift-250g", form: "whole_bean", weightGrams: 250, roastLevel: "medium" },
-      { productId: "velvet-ground-340g", form: "ground", weightGrams: 340, roastLevel: "medium", grindSize: 3 },
-      { productId: "midnight-ground-250g", form: "ground", weightGrams: 250, roastLevel: "dark", grindSize: 2 },
+      { productId: "morning-lift-250g", form: CoffeeForm.whole_bean, weightGrams: 250, roastLevel: CoffeeRoastLevel.light },
+      { productId: "velvet-ground-340g", form: CoffeeForm.ground, weightGrams: 340, roastLevel: CoffeeRoastLevel.medium, grindSize: 3 },
+      { productId: "midnight-ground-250g", form: CoffeeForm.ground, weightGrams: 250, roastLevel: CoffeeRoastLevel.dark, grindSize: 2 },
     ]
   })
 
@@ -94,7 +99,7 @@ main().finally(async () => {
   console.log("seed.ts all good bro :D")
   const bundles = await prisma.product.findMany({
     where: {
-      category: "bundle",
+      category: ProductCategory.bundle,
     },
     include: {
       bundle: {
@@ -102,6 +107,5 @@ main().finally(async () => {
       }
     }
   })
-  console.dir(bundles, { depth: null })
   await prisma.$disconnect()
 })

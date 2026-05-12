@@ -10,12 +10,18 @@ datasource db {
   provider = "sqlite"
 }
 
+enum ProductCategory {
+  coffee
+  merch
+  bundle
+}
+
 model Product {
-  id             String @id
+  id             String          @id
   name           String
   description    String
   unitPriceCents Int
-  category       String // "coffee" | "merch" | "bundle"
+  category       ProductCategory
 
   coffee Coffee?
   merch  Merch?
@@ -24,13 +30,24 @@ model Product {
   includedInBundles BundleItem[] @relation("includedInBundle")
 }
 
+enum CoffeeForm {
+  ground
+  whole_bean
+}
+
+enum CoffeeRoastLevel {
+  light
+  medium
+  dark
+}
+
 model Coffee {
   productId String  @id
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  form        String // "ground" | "whole_bean"
+  form        CoffeeForm
   weightGrams Int
-  roastLevel  String // "light" | "medium" | "dark"
+  roastLevel  CoffeeRoastLevel
   grindSize   Int?
 }
 

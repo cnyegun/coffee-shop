@@ -46,13 +46,12 @@ function mapRowToProductContract(p: ProductRow): ProductInput {
     }
     case ProductCategory.bundle: {
       if (p.bundle == undefined) throw new Error(`Missing bundle ${p.id}`)
-      if (p.bundle.items == undefined) throw new Error(`Missing items ${p.id}`)
       return {
         ...base,
         category: p.category,
         items: p.bundle.items.map((item) => {
           if (item.product.category == ProductCategory.bundle)
-            throw new Error(`Bundle cannot contains other bundle ${p.id}`)
+            throw new Error(`Bundle cannot contain other bundle ${p.id}`)
           return {
             product: {
               id: item.product.id,

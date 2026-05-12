@@ -1,11 +1,12 @@
 import { z } from "zod"
 
+export const FlavorSchema = z.array(z.string().nonempty()).nonempty()
+
 const BaseProductSchema = z.object({
   id: z.string().nonempty(),
   name: z.string().nonempty(),
   description: z.string().optional(),
   imageUrl: z.string().nonempty(),
-  flavours: z.array(z.string().nonempty()).nonempty(),
   unitPriceCents: z.number().int().nonnegative()
 }).strict()
 
@@ -13,6 +14,7 @@ const CoffeeBaseSchema = BaseProductSchema.safeExtend({
   category: z.literal("coffee"),
   weightGrams: z.number().int().positive(),
   roastLevel: z.enum(["light", "medium", "dark"]),
+  flavours: FlavorSchema,
 }).strict()
 
 const CoffeeSchema = z.discriminatedUnion("form", [

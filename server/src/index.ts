@@ -15,7 +15,7 @@ function mapRowToProductContract(p: ProductRow): ProductInput {
     unitPriceCents: p.unitPriceCents
   }
   switch (p.category) {
-    case ProductCategory.coffee:
+    case ProductCategory.coffee: {
       if (!p.coffee) throw new Error(`Missing coffee data for: ${p.id}`)
       if (p.coffee.form == CoffeeForm.ground) {
         if (p.coffee.grindSize == null) throw new Error(`Missing grounded coffee grindSize ${p.id}`)
@@ -35,14 +35,16 @@ function mapRowToProductContract(p: ProductRow): ProductInput {
         form: p.coffee.form,
         roastLevel: p.coffee.roastLevel,
       }
-    case ProductCategory.merch:
+    }
+    case ProductCategory.merch: {
       if (p.merch == undefined) throw new Error(`Missing merch ${p.id}`)
       return {
         ...base,
         category: p.category,
         merchType: p.merch.merchType
       }
-    case ProductCategory.bundle:
+    }
+    case ProductCategory.bundle: {
       if (p.bundle == undefined) throw new Error(`Missing bundle ${p.id}`)
       if (p.bundle.items == undefined) throw new Error(`Missing items ${p.id}`)
       return {
@@ -62,6 +64,7 @@ function mapRowToProductContract(p: ProductRow): ProductInput {
           }
         })
       }
+    }
   }
 }
 

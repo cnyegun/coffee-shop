@@ -41,7 +41,7 @@ export const ProductSchema = z.discriminatedUnion("category", [
 
   BaseProductSchema.safeExtend({
     category: z.literal("merch"),
-    merchType: z.enum(["shirt", "mug", "tote"])
+    merchType: z.string().nonempty()
   }),
 
   BaseProductSchema.safeExtend({

@@ -4,6 +4,8 @@ const BaseProductSchema = z.object({
   id: z.string().nonempty(),
   name: z.string().nonempty(),
   description: z.string().optional(),
+  imageUrl: z.string().nonempty(),
+  flavours: z.array(z.string().nonempty()).nonempty(),
   unitPriceCents: z.number().int().nonnegative()
 }).strict()
 

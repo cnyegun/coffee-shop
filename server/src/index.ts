@@ -1,18 +1,28 @@
 import { prisma } from "../lib/prisma"
+import { z } from "zod"
 import express from "express"
-import { ProductListResponseSchema, ProductSchema } from "contract"
+import { ProductListResponseSchema, ProductSchema, FlavorSchema } from "contract"
 import type { Product, ProductInput } from "contract"
 import { ProductCategory, CoffeeForm, CoffeeRoastLevel } from "../generated/prisma/enums"
 
 const app = express()
 const port = 3000
 
+function parseFlavours(flavours_raw: string): string[] {
+  try {
+    return JSON.parse(flavours_raw)
+  } catch {
+    throw new Error("Invalid coffee flavours")
+  }
+}
+
 function mapRowToProductContract(p: ProductRow): ProductInput {
   const base = {
     id: p.id,
     name: p.name,
     description: p.description,
-    unitPriceCents: p.unitPriceCents
+    unitPriceCents: p.unitPriceCents,
+    imageUrl: p.imageUrl
   }
   switch (p.category) {
     case ProductCategory.coffee: {
@@ -26,6 +36,7 @@ function mapRowToProductContract(p: ProductRow): ProductInput {
           form: p.coffee.form,
           roastLevel: p.coffee.roastLevel,
           grindSize: p.coffee.grindSize,
+          flavours: parseFlavours(p.coffee.flavours)
         }
       }
       return {
@@ -34,6 +45,7 @@ function mapRowToProductContract(p: ProductRow): ProductInput {
         weightGrams: p.coffee.weightGrams,
         form: p.coffee.form,
         roastLevel: p.coffee.roastLevel,
+        flavours: parseFlavours(p.coffee.flavours)
       }
     }
     case ProductCategory.merch: {

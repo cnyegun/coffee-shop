@@ -22,6 +22,7 @@ model Product {
   description    String
   unitPriceCents Int
   category       ProductCategory
+  imageUrl       String
 
   coffee Coffee?
   merch  Merch?
@@ -44,6 +45,7 @@ enum CoffeeRoastLevel {
 model Coffee {
   productId String  @id
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  flavours  String // store this as ["flavor1", "flavor2", "flavor3"]
 
   form        CoffeeForm
   weightGrams Int

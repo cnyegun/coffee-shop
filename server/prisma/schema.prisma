@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Product {
+  id             String @id
+  name           String
+  description    String
+  unitPriceCents Int
+  category       String // "coffee" | "merch" | "bundle"
+
+  coffee Coffee?
+  merch  Merch?
+  bundle Bundle?
+
+  includedInBundles BundleItem[] @relation("includedInBundle")
+}
+
+model Coffee {
+  productId String  @id
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  form        String // "ground" | "whole_bean"
+  weightGrams Int
+  roastLevel  String // "light" | "medium" | "dark"
+  grindSize   Int?
+}
+
+model Merch {
+  productId String  @id
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  merchType String
+}
+
+model BundleItem {
+  bundleId  String
+  bundle    Bundle  @relation(fields: [bundleId], references: [productId], onDelete: Cascade)
+  productId String
+  product   Product @relation("includedInBundle", fields: [productId], references: [id])
+  quantity  Int
+
+  @@id([bundleId, productId])
+}
+
+model Bundle {
+  productId String       @id
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  items     BundleItem[]
+}

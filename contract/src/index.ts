@@ -50,6 +50,7 @@ export const ProductSchema = z.discriminatedUnion("category", [
   })
 ])
 export type Product = z.infer<typeof ProductSchema>
+export type ProductInput = z.input<typeof ProductSchema>
 
 export const ProductListResponseSchema = z.object({
   items: z.array(ProductSchema)

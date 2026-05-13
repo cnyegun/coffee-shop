@@ -4,8 +4,6 @@
     "target": "esnext",
     "moduleResolution": "bundler",
     "types": [],
-    "sourceMap": true,
-    "declarationMap": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "noImplicitReturns": true,

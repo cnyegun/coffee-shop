@@ -8,11 +8,15 @@ const app = express()
 const port = 3000
 
 function parseFlavours(flavours_raw: string): string[] {
+  let result: unknown
   try {
-    return JSON.parse(flavours_raw)
+    result = JSON.parse(flavours_raw)
   } catch {
     throw new Error("Invalid coffee flavours")
   }
+  if (!Array.isArray(result) || !result.every((x) => typeof x === "string"))
+    throw new Error("Coffee flavours must be array of strings")
+  return result
 }
 
 function mapRowToProductContract(p: ProductRow): ProductInput {
@@ -26,8 +30,8 @@ function mapRowToProductContract(p: ProductRow): ProductInput {
   switch (p.category) {
     case ProductCategory.coffee: {
       if (!p.coffee) throw new Error(`Missing coffee data for: ${p.id}`)
-      if (p.coffee.form == CoffeeForm.ground) {
-        if (p.coffee.grindSize == null) throw new Error(`Missing grounded coffee grindSize ${p.id}`)
+      if (p.coffee.form === CoffeeForm.ground) {
+        if (p.coffee.grindSize === null) throw new Error(`Missing grounded coffee grindSize ${p.id}`)
         return {
           ...base,
           category: p.category,
@@ -48,7 +52,7 @@ function mapRowToProductContract(p: ProductRow): ProductInput {
       }
     }
     case ProductCategory.merch: {
-      if (p.merch == undefined) throw new Error(`Missing merch ${p.id}`)
+      if (p.merch === undefined || p.merch === null) throw new Error(`Missing merch ${p.id}`)
       return {
         ...base,
         category: p.category,
@@ -56,12 +60,12 @@ function mapRowToProductContract(p: ProductRow): ProductInput {
       }
     }
     case ProductCategory.bundle: {
-      if (p.bundle == undefined) throw new Error(`Missing bundle ${p.id}`)
+      if (p.bundle === undefined || p.bundle === null) throw new Error(`Missing bundle ${p.id}`)
       return {
         ...base,
         category: p.category,
         items: p.bundle.items.map((item) => {
-          if (item.product.category == ProductCategory.bundle)
+          if (item.product.category === ProductCategory.bundle)
             throw new Error(`Bundle cannot contain other bundle ${p.id}`)
           return {
             product: {

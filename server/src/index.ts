@@ -3,6 +3,7 @@ import express from "express"
 import { ProductListResponseSchema, ProductSchema, FlavorSchema } from "contract"
 import type { Product, ProductInput } from "contract"
 import { ProductCategory, CoffeeForm, CoffeeRoastLevel } from "../generated/prisma/enums"
+import path from "path"
 
 const app = express()
 const port = 3000
@@ -100,6 +101,8 @@ app.get('/products', async (req, res) => {
     items: products
   }))
 })
+
+app.use('/images', express.static(path.resolve("images/products")))
 
 app.listen(port, () => {
   console.log(`coffee-shop listening on port ${port}`)

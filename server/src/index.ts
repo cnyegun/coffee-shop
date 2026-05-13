@@ -1,5 +1,4 @@
 import { prisma } from "../lib/prisma"
-import { z } from "zod"
 import express from "express"
 import { ProductListResponseSchema, ProductSchema, FlavorSchema } from "contract"
 import type { Product, ProductInput } from "contract"

@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: rgb(248 245 241);
+}

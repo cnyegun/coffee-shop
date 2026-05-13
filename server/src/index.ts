@@ -94,7 +94,7 @@ function findProductRows() {
 }
 type ProductRow = Awaited<ReturnType<typeof findProductRows>>[number]
 
-app.get('/products', async (req, res) => {
+app.get('/api/products', async (req, res) => {
   const productRows: ProductRow[] = await findProductRows()
   const products: ProductInput[] = productRows.map(mapRowToProductContract)
   res.json(ProductListResponseSchema.parse({

@@ -1,12 +1,76 @@
 import { ShoppingBag } from "lucide-react"
+import { useState, useEffect } from "react"
+import type { Product, ProductListResponse } from "contract"
+
 
 export default function ProductPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  useEffect(() => {
+    async function loadProducts() {
+      const res = await fetch("/api/products")
+      const data: ProductListResponse = await res.json()
+      setProducts(data.items)
+    }
+    loadProducts()
+  }, [])
   return (
-    <header className="grid grid-cols-3 items-center bg-cream px-15 h-25">
-      <BrandLogo />
-      <Nav />
-      <CheckoutLink />
-    </header>
+    <main>
+      <header className="grid grid-cols-3 items-center bg-cream px-15 h-25">
+        <BrandLogo />
+        <Nav />
+        <CheckoutLink />
+      </header>
+      <ProductGrid products={products} />
+    </main>
+  )
+}
+
+function ProductGrid({ products }: { products: Product[] }) {
+  if (products.length === 0) return null
+  return (
+    <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-8 py-10 sm:grid-cols-2 lg:grid-cols-4">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </section>
+  )
+}
+
+function ProductCard({ product }: { product: Product }) {
+  const price = product.unitPriceCents.toLocaleString("vi-VN")
+  const flavourText = product.category === "coffee" ? product.flavours.join(", ") : product.description
+
+  return (
+    <article className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+      <a href={`/products/${product.id}`} className="block bg-stone-50">
+        <img
+          src={product.imageUrl}
+          alt={product.name}
+          className="aspect-3/4 w-full object-cover"
+        />
+      </a>
+
+      <div className="px-5 py-4 text-center">
+        <a href={`/products/${product.id}`} className="font-serif text-xl text-stone-900 hover:underline">
+          {product.name}
+        </a>
+
+        {product.description && (
+          <p className="mt-1 text-sm text-stone-500">{product.description}</p>
+        )}
+
+        {flavourText && (
+          <p className="mt-3 min-h-10 text-sm leading-5 text-stone-600">{flavourText}</p>
+        )}
+
+        <p className="mt-4 font-serif text-xl font-semibold text-stone-950">{price}đ</p>
+
+        <button className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md border border-stone-800 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-stone-900">
+          Thêm vào giỏ
+          <ShoppingBag size={15} strokeWidth={1.8} />
+        </button>
+      </div>
+    </article>
   )
 }
 

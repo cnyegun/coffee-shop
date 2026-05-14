@@ -26,7 +26,7 @@ function mapRowToProductContract(p: ProductRow): ProductInput {
     name: p.name,
     description: p.description,
     unitPriceCents: p.unitPriceCents,
-    imageUrl: p.imageUrl
+    imageUrl: `/images/${path.basename(p.imageUrl)}`
   }
   switch (p.category) {
     case ProductCategory.coffee: {
